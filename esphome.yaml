@@ -1,0 +1,429 @@
+substitutions:
+  name: e1002
+  friendly_name: "reTerminal E1002"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  on_boot:
+    priority: 600
+    then:
+      - lambda: |-
+          auto wakeup_cause = esp_sleep_get_wakeup_cause();
+          if (wakeup_cause == ESP_SLEEP_WAKEUP_EXT0) {
+            ESP_LOGI("boot", "Woke up from deep sleep by button press (GPIO3) - will refresh current page");
+          } else if (wakeup_cause == ESP_SLEEP_WAKEUP_TIMER) {
+            ESP_LOGI("boot", "Woke up from deep sleep by timer - will check HA selector");
+          } else {
+            ESP_LOGI("boot", "Normal boot (not from deep sleep) - will check HA selector");
+          }
+      - output.turn_on: bsp_sd_enable
+      - output.turn_on: bsp_battery_enable
+      - delay: 200ms
+      - component.update: battery_voltage
+      - component.update: battery_level
+      - light.turn_on: onboard_led
+      - delay: 5s  # Wait for WiFi and HA connection
+      - script.execute: handle_wakeup
+      - script.execute: reset_sleep_timer
+
+
+esp32:
+  board: seeed_xiao_esp32s3
+  framework:
+    type: esp-idf
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "your_random_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+# Deep sleep component
+deep_sleep:
+  id: deep_sleep_1
+  wakeup_pin: GPIO3
+  wakeup_pin_mode: INVERT_WAKEUP
+
+# SPI / I²C
+spi:
+  clk_pin: GPIO7
+  mosi_pin: GPIO9
+i2c:
+  scl: GPIO20
+  sda: GPIO19
+
+globals:
+  - id: page_index
+    type: int
+    restore_value: true
+    initial_value: '0'
+  - id: sleep_timer_seconds
+    type: int
+    restore_value: false
+    initial_value: '0'
+
+# Built in Sensors
+sensor:
+  - platform: sht4x
+    temperature:
+      name: "Temperature"
+      id: temp_sensor
+    humidity:
+      name: "Relative Humidity"
+      id: hum_sensor
+  - platform: adc
+    pin: GPIO1
+    name: "Battery Voltage"
+    id: battery_voltage
+    update_interval: 60s
+    attenuation: 12db
+    filters:
+      - multiply: 2.0
+    on_value:
+      then:
+        - component.update: battery_level
+  - platform: template
+    name: "Battery Level"
+    id: battery_level
+    unit_of_measurement: "%"
+    icon: "mdi:battery"
+    device_class: battery
+    state_class: measurement
+    lambda: 'return id(battery_voltage).state;'
+    update_interval: never
+    filters:
+      - calibrate_linear:
+          - 4.15 -> 100.0
+          - 3.96 -> 90.0
+          - 3.91 -> 80.0
+          - 3.85 -> 70.0
+          - 3.80 -> 60.0
+          - 3.75 -> 50.0
+          - 3.68 -> 40.0
+          - 3.58 -> 30.0
+          - 3.49 -> 20.0
+          - 3.41 -> 10.0
+          - 3.30 -> 5.0
+          - 3.27 -> 0.0
+      - clamp:
+          min_value: 0
+          max_value: 100
+
+output:
+  # Onboard LED
+  - platform: gpio
+    pin: GPIO6
+    id: bsp_led
+    inverted: true
+  # sdcard
+  - platform: gpio
+    pin: GPIO16
+    id: bsp_sd_enable
+  # battery monitoring
+  - platform: gpio
+    pin: GPIO21
+    id: bsp_battery_enable
+
+# Onboard LED
+light:
+  - platform: binary
+    name: "Onboard LED"
+    output: bsp_led
+    id: onboard_led
+    internal: true  # Hidden from Home Assistant
+
+## Get time from Home Assistant
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+    timezone: "Europe/Dublin"
+
+# Home Assistant text sensor for page selector
+text_sensor:
+  - platform: homeassistant
+    id: ha_page_selector
+    entity_id: input_select.reterminal_e1002_page_selector
+    internal: true
+  - platform: version
+    hide_timestamp: true
+    name: "${friendly_name} ESPHome Version"
+    entity_category: diagnostic
+  - platform: wifi_info
+    ip_address:
+      name: "${friendly_name} IP Address"
+      icon: mdi:wifi
+      entity_category: diagnostic
+      id: sensorip
+    ssid:
+      name: "${friendly_name} Connected SSID"
+      icon: mdi:wifi-strength-2
+      entity_category: diagnostic
+      id: sensorssid
+
+# Sleep timer - increments every second
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          id(sleep_timer_seconds)++;
+          if (id(sleep_timer_seconds) % 30 == 0) {
+            ESP_LOGI("sleep_timer", "Timer at %d seconds", id(sleep_timer_seconds));
+          }
+          if (id(sleep_timer_seconds) >= 90) {
+            ESP_LOGI("sleep_timer", "90 seconds elapsed, checking time and entering sleep");
+            id(check_time_and_sleep).execute();
+          }
+
+# Navigation buttons
+binary_sensor:
+  - platform: gpio    # Next page
+    pin:
+      number: GPIO4
+      mode: INPUT_PULLUP
+      inverted: true
+    id: right
+    name: "Right"
+    internal: true
+    on_press:
+      then:
+        - script.execute: reset_sleep_timer
+        - lambda: |-
+            id(page_index) = (id(page_index) + 1) % 4;
+        - if:
+            condition:
+              lambda: 'return id(page_index) == 0;'
+            then:
+              - component.update: dashboard_image_home
+        - if:
+            condition:
+              lambda: 'return id(page_index) == 1;'
+            then:
+              - component.update: dashboard_image_energy
+        - if:
+            condition:
+              lambda: 'return id(page_index) == 2;'
+            then:
+              - component.update: dashboard_image_plants
+        - if:
+            condition:
+              lambda: 'return id(page_index) == 3;'
+            then:
+              - component.update: dashboard_image_wallpaper
+
+  - platform: gpio     # Prev page
+    pin:
+      number: GPIO5
+      mode: INPUT_PULLUP
+      inverted: true
+    id: left
+    name: "Left"
+    internal: true
+    on_press:
+      then:
+        - script.execute: reset_sleep_timer
+        - lambda: |-
+            id(page_index) = (id(page_index) - 1 + 4) % 4;
+        - if:
+            condition:
+              lambda: 'return id(page_index) == 0;'
+            then:
+              - component.update: dashboard_image_home
+        - if:
+            condition:
+              lambda: 'return id(page_index) == 1;'
+            then:
+              - component.update: dashboard_image_energy
+        - if:
+            condition:
+              lambda: 'return id(page_index) == 2;'
+            then:
+              - component.update: dashboard_image_plants
+        - if:
+            condition:
+              lambda: 'return id(page_index) == 3;'
+            then:
+              - component.update: dashboard_image_wallpaper
+
+http_request:
+  verify_ssl: false
+  timeout: 10s
+  watchdog_timeout: 15s
+
+script:
+  - id: reset_sleep_timer
+    mode: restart
+    then:
+      - lambda: |-
+          ESP_LOGI("sleep_timer", "Timer reset to 0");
+          id(sleep_timer_seconds) = 0;
+
+  - id: handle_wakeup
+    mode: single
+    then:
+      - lambda: |-
+          auto wakeup_cause = esp_sleep_get_wakeup_cause();
+
+          if (wakeup_cause == ESP_SLEEP_WAKEUP_EXT0) {
+            // GPIO3 press - refresh current page
+            ESP_LOGI("wakeup", "GPIO3 wakeup - refreshing current page (index: %d)", id(page_index));
+            if (id(page_index) == 0) {
+              id(dashboard_image_home).update();
+            } else if (id(page_index) == 1) {
+              id(dashboard_image_energy).update();
+            } else if (id(page_index) == 2) {
+              id(dashboard_image_plants).update();
+            } else if (id(page_index) == 3) {
+              id(dashboard_image_wallpaper).update();
+            }
+          } else {
+            // Timer wakeup or normal boot - check HA selector
+            ESP_LOGI("wakeup", "Timer/normal boot - checking HA page selector");
+
+            // Check if sensor has a valid state
+            if (id(ha_page_selector).has_state()) {
+              std::string page_selection = id(ha_page_selector).state;
+              ESP_LOGI("wakeup", "HA selector value: %s", page_selection.c_str());
+
+              if (page_selection == "home") {
+                id(page_index) = 0;
+                id(dashboard_image_home).update();
+              } else if (page_selection == "energy") {
+                id(page_index) = 1;
+                id(dashboard_image_energy).update();
+              } else if (page_selection == "plants") {
+                id(page_index) = 2;
+                id(dashboard_image_plants).update();
+              } else if (page_selection == "wallpaper") {
+                id(page_index) = 3;
+                id(dashboard_image_wallpaper).update();
+              } else {
+                ESP_LOGW("wakeup", "Unknown selector value, defaulting to Home");
+                id(page_index) = 0;
+                id(dashboard_image_home).update();
+              }
+            } else {
+              ESP_LOGW("wakeup", "HA selector not available, defaulting to Home");
+              id(page_index) = 0;
+              id(dashboard_image_home).update();
+            }
+          }
+
+  - id: check_time_and_sleep
+    mode: single
+    then:
+      - lambda: |-
+          auto time = id(homeassistant_time).now();
+          if (!time.is_valid()) {
+            ESP_LOGW("sleep_script", "Time not available, sleeping for 30 minutes");
+            id(onboard_led).turn_off();
+            id(deep_sleep_1).set_sleep_duration(30 * 60 * 1000);
+            id(deep_sleep_1).begin_sleep();
+            return;
+          }
+
+          int hour = time.hour;
+          ESP_LOGI("sleep_script", "Current hour: %d", hour);
+
+          if (hour >= 22 || hour < 6) {
+            ESP_LOGI("sleep_script", "Night time (22:00-06:00), switching to wallpaper page");
+            id(page_index) = 3;
+            id(dashboard_image_wallpaper).update();
+            delay(5000);
+
+            int hours_until_6am;
+            if (hour >= 22) {
+              hours_until_6am = (24 - hour) + 6;
+            } else {
+              hours_until_6am = 6 - hour;
+            }
+
+            ESP_LOGI("sleep_script", "Sleeping for %d hours until 6am", hours_until_6am);
+            id(onboard_led).turn_off();
+            id(deep_sleep_1).set_sleep_duration(hours_until_6am * 60 * 60 * 1000);
+            id(deep_sleep_1).begin_sleep();
+          } else {
+            id(onboard_led).turn_off();
+            ESP_LOGI("sleep_script", "Day time (06:00-22:00), sleeping for 1 hour");
+            id(deep_sleep_1).set_sleep_duration(60 * 60 * 1000);
+            id(deep_sleep_1).begin_sleep();
+          }
+
+online_image:
+  - id: dashboard_image_home
+    format: PNG
+    type: RGB565
+    buffer_size: 65536
+    url: http://192.168.1.100:10000/eink-e1002/home?viewport=800x480&theme=graphite-eink-light&eink=10&dither=floydSteinberg&serpentine&display=acep
+    update_interval: never
+    on_download_finished:
+      - delay: 100ms
+      - component.update: epaper_display
+
+  - id: dashboard_image_energy
+    format: PNG
+    type: RGB565
+    buffer_size: 65536
+    url: http://192.168.1.100:10000/eink-e1002/energy?viewport=800x480&theme=graphite-eink-light&eink=10&dither=floydSteinberg&serpentine&display=acep
+    update_interval: never
+    on_download_finished:
+      - delay: 100ms
+      - component.update: epaper_display
+
+  - id: dashboard_image_plants
+    format: PNG
+    type: RGB565
+    buffer_size: 65536
+    url: http://192.168.1.100:10000/eink-e1002/plants?viewport=800x480&theme=graphite-eink-light
+    update_interval: never
+    on_download_finished:
+      - delay: 100ms
+      - component.update: epaper_display
+
+  - id: dashboard_image_wallpaper
+    format: PNG
+    type: RGB565
+    buffer_size: 65536
+    url: http://192.168.1.100:10000/eink-e1002/wallpaper?viewport=800x480&theme=graphite-eink-light&eink=32&dither=floydSteinberg&serpentine&display=spectra6
+    update_interval: never
+    on_download_finished:
+      - delay: 100ms
+      - component.update: epaper_display
+
+display:
+  - platform: epaper_spi
+    id: epaper_display
+    cs_pin: GPIO10
+    dc_pin: GPIO11
+    busy_pin:
+      number: GPIO13
+      inverted: true
+    reset_pin:
+      number: GPIO12
+      inverted: false
+    model: 7.3in-spectra-e6
+    update_interval: never
+    lambda: |-
+      if (id(page_index) == 0) {
+        it.image(0, 0, id(dashboard_image_home));
+      } else if (id(page_index) == 1) {
+        it.image(0, 0, id(dashboard_image_energy));
+      } else if (id(page_index) == 2) {
+        it.image(0, 0, id(dashboard_image_plants));
+      } else if (id(page_index) == 3) {
+        it.image(0, 0, id(dashboard_image_wallpaper));
+      }

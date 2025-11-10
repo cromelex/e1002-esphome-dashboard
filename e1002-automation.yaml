@@ -1,0 +1,97 @@
+alias: ReTerminal E1002 dashboard page selector
+description: ""
+triggers:
+  - trigger: time_pattern
+    minutes: /30
+conditions: []
+actions:
+  - choose:
+      - alias: If any plant is in state "problem", display the Plants Dashboard page
+        conditions:
+          - condition: state
+            entity_id:
+              - plant.butterfly_palm
+              - plant.dracaena
+              - plant.olive
+              - plant.fishbone_cactus
+              - plant.fishbone_cactus_kitchen
+              - plant.fishbone_cactus_office
+              - plant.mistletoe_cactus
+              - plant.peperomia
+              - plant.peperomia_santorini
+            state:
+              - problem
+        sequence:
+          - action: input_select.select_option
+            metadata: {}
+            data:
+              option: plants
+            target:
+              entity_id: input_select.reterminal_e1002_page_selector
+      - alias: >-
+          If time between 9.30am and 1pm, and current and forecasted solar
+          energy production is high, display Energy Dashboard page
+        conditions:
+          - condition: time
+            after: "09:30:00"
+            before: "13:00:00"
+            weekday:
+              - sat
+              - fri
+              - thu
+              - wed
+              - tue
+              - mon
+          - condition: numeric_state
+            entity_id: sensor.energy_next_hour
+            above: 1.5
+          - condition: numeric_state
+            entity_id: sensor.grid_export_power
+            above: 1500
+        sequence:
+          - action: input_select.select_option
+            metadata: {}
+            data:
+              option: energy
+            target:
+              entity_id: input_select.reterminal_e1002_page_selector
+      - alias: If nobody is home, display Wallpaper Dashboard page
+        conditions:
+          - condition: state
+            entity_id: zone.home
+            state:
+              - "0"
+        sequence:
+          - delay:
+              hours: 0
+              minutes: 0
+              seconds: 3
+              milliseconds: 0
+          - action: input_select.select_option
+            metadata: {}
+            data:
+              option: wallpaper
+            target:
+              entity_id: input_select.reterminal_e1002_page_selector
+      - alias: If Battery is under 5%, send Notification
+        conditions:
+          - condition: numeric_state
+            entity_id: sensor.e1002_battery_level
+            below: 5
+          - condition: sun
+            before: sunset
+            after: sunrise
+        sequence:
+          - action: notify.html5
+            data:
+              message: The ReTerminal E1002 battery is under 5%. Please recharge soon.
+              title: ReTerminal Low Battery
+    default:
+      - alias: Display default Home Dashboard page
+        action: input_select.select_option
+        metadata: {}
+        data:
+          option: home
+        target:
+          entity_id: input_select.reterminal_e1002_page_selector
+mode: single

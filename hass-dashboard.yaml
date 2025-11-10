@@ -1,0 +1,812 @@
+views:
+  - title: Home
+    type: sections
+    max_columns: 4
+    path: home
+    sections:
+      - type: grid
+        cards:
+          - type: custom:clock-weather-card
+            entity: weather.home
+            sun_entity: sun.sun
+            hide_clock: true
+            weather_icon_type: line
+            animated_icon: false
+            forecast_rows: 4
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 700;
+                  padding: 0px !important
+                }
+                forecast-temperature-bar-range {
+                  border: 1px solid black;
+                  box-sizing: border-box;
+                }
+                forecast-temperature-bar-background {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                  box-sizing: border-box !important;
+                }
+                forecast-icon {
+                  border-radius: 15px !important;
+                  filter: grayscale(1) brightness(0.4);
+                  width: 40px;
+                  height: 40px
+                }
+                clock-weather-card-today-left {
+                  filter: grayscale(1) brightness(0);
+                  max-height: 50px;
+                  transform: scale(2.8) translate(0px, 9px);
+                }
+          - type: heading
+            icon: mdi:train-car
+            heading: Transport
+            heading_style: subtitle
+            visibility:
+              - condition: state
+                entity: group.family
+                state: home
+          - type: custom:mushroom-template-card
+            secondary: EV6 Range
+            entity: sensor.ev6_ev_range
+            icon: mdi:ev-station
+            primary: '{{ states.sensor.ev6_ev_range.state_with_unit }}'
+            color: |-
+              {%- if states("sensor.ev6_ev_range") | float < 120 -%}
+              red
+              {%- elif states("sensor.ev6_ev_range") | float < 250 -%}
+              orange
+              {%- elif states("sensor.ev6_ev_range") | float >= 250 -%}
+              green
+              {%- else -%}
+              grey
+              {%- endif %}
+            features_position: bottom
+            card_mod:
+              style:
+                ha-tile-icon$: |
+                  .container {
+                    width: 50px !important;
+                    height: 50px !important;
+                  }
+                .: |
+                  ha-tile-icon {
+                    --mdc-icon-size: 40px !important;
+                     }
+                  ha-card {
+                    margin-top: -5px !important;
+                    margin-left: -5px !important;
+                     }
+          - type: custom:mushroom-template-card
+            secondary: Inster Range
+            entity: sensor.inster_ev_range
+            icon: mdi:ev-station
+            primary: '{{ states.sensor.inster_ev_range.state_with_unit }}'
+            color: |-
+              {%- if states("sensor.inster_ev_range") | float < 120 -%}
+              red
+              {%- elif states("sensor.inster_ev_range") | float < 200 -%}
+              orange
+              {%- elif states("sensor.inster_ev_range") | float >= 200 -%}
+              green
+              {%- else -%}
+              grey
+              {%- endif %}
+            features_position: bottom
+            card_mod:
+              style:
+                ha-tile-icon$: |
+                  .container {
+                    width: 50px !important;
+                    height: 50px !important;
+                  }
+                .: |
+                  ha-tile-icon {
+                    --mdc-icon-size: 40px !important;
+                     }
+                  ha-card {
+                    margin-top: -5px !important;
+                    margin-left: -5px !important;
+                     }
+          - type: custom:mushroom-template-card
+            primary: Daniel's workplace
+            secondary: '{{ states(''sensor.daniel_commute_in'') | float | round(0)  }} min'
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            entity: sensor.daniel_commute_in
+            grid_options:
+              columns: 6
+              rows: 1
+            badge_icon: ''
+            icon: >-
+              {% set state = states('sensor.daniel_commute_in') %}
+
+              {% if is_number(state) and state | float > 44 %} mdi:car-clock
+
+              {% elif is_number(state) and state | float > 34 %}
+              mdi:car-multiple
+
+              {% elif is_number(state) and state | float > 1 %} mdi:car
+
+              {% else %} mdi:calendar-question
+
+              {% endif %}
+            visibility:
+              - condition: state
+                entity: binary_sensor.workday_sensor
+                state: 'on'
+              - condition: state
+                entity: person.daniel
+                state: home
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.morning
+                    state: 'on'
+                  - condition: state
+                    entity: binary_sensor.early_morning
+                    state: 'on'
+            color: |-
+              {% set state = states('sensor.daniel_commute_in') %}
+              {% if is_number(state) and state | float > 44 %} red
+              {% elif is_number(state) and state | float > 34 %} orange
+              {% elif is_number(state) and state | float > 1 %} green
+              {% else %} grey
+              {% endif %}
+            features_position: bottom
+            card_mod:
+              style:
+                ha-tile-icon$: |
+                  .container {
+                    width: 50px !important;
+                    height: 50px !important;
+                  }
+                .: |
+                  ha-tile-icon {
+                    --mdc-icon-size: 40px !important;
+                     }
+                  ha-card {
+                    margin-top: -5px !important;
+                    margin-left: -5px !important;
+                     }
+          - type: custom:mushroom-template-card
+            secondary: >-
+              {{ states('sensor.next_family_calendar_event_trip') | float |
+              round(0)  }} min
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            entity: sensor.next_family_calendar_event_trip
+            grid_options:
+              columns: 6
+              rows: 1
+            badge_icon: ''
+            icon: >-
+              {% set state = states('sensor.next_family_calendar_event_trip') %}
+
+              {% if is_number(state) and state | float > 60 %} mdi:car-clock
+
+              {% elif is_number(state) and state | float > 45 %}
+              mdi:car-multiple
+
+              {% elif is_number(state) and state | float > 1 %} mdi:car
+
+              {% else %} mdi:calendar-question
+
+              {% endif %}
+            primary: '{{ state_attr(''calendar.family'', ''message'') }}'
+            visibility:
+              - condition: numeric_state
+                entity: sensor.next_calendar_family_event_date
+                below: 1
+              - condition: state
+                entity: sensor.location_for_family_calendar_event
+                state_not: zone.home
+              - condition: state
+                entity: group.family
+                state: home
+              - condition: numeric_state
+                entity: sensor.next_family_calendar_event_trip
+                below: 500
+            color: |-
+              {% set state = states('sensor.next_family_calendar_event_trip') %}
+              {% if is_number(state) and state | float > 60 %} red
+              {% elif is_number(state) and state | float > 45 %} amber
+              {% elif is_number(state) and state | float > 1 %} green
+              {% else %} grey
+              {% endif %}
+            features_position: bottom
+            card_mod:
+              style:
+                ha-tile-icon$: |
+                  .container {
+                    width: 50px !important;
+                    height: 50px !important;
+                  }
+                .: |
+                  ha-tile-icon {
+                    --mdc-icon-size: 40px !important;
+                     }
+                  ha-card {
+                    margin-top: -5px !important;
+                    margin-left: -5px !important;
+                     }
+          - type: custom:mushroom-template-card
+            primary: Filipa's Workplace
+            secondary: '{{ states(''sensor.filipa_commute_in'') | float | round(0) }} min'
+            icon: |-
+              {% set state = states('sensor.filipa_commute_in') %}
+              {% if is_number(state) and state | float > 60 %}mdi:car-clock
+              {% elif is_number(state) and state | float > 45 %}mdi:car-multiple
+              {% elif is_number(state) and state | float > 1 %} mdi:car
+              {% else %} mdi:calendar-question
+              {% endif %}
+            tap_action:
+              action: none
+            hold_action:
+              action: none
+            double_tap_action:
+              action: none
+            entity: sensor.filipa_commute_in
+            grid_options:
+              columns: 6
+              rows: 1
+            visibility:
+              - condition: state
+                entity: person.filipa
+                state: home
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity: binary_sensor.early_morning
+                    state: 'on'
+                  - condition: state
+                    entity: binary_sensor.evening
+                    state: 'on'
+            color: |-
+              {% set state = states('sensor.filipa_commute_in') %}
+              {% if is_number(state) and state | float > 60 %} red
+              {% elif is_number(state) and state | float > 45 %} amber
+              {% elif is_number(state) and state | float > 1 %} green
+              {% else %} mdi:calendar-question
+              {% endif %}
+            features_position: bottom
+            card_mod:
+              style:
+                ha-tile-icon$: |
+                  .container {
+                    width: 50px !important;
+                    height: 50px !important;
+                  }
+                .: |
+                  ha-tile-icon {
+                    --mdc-icon-size: 40px !important;
+                     }
+                  ha-card {
+                    margin-top: -5px !important;
+                    margin-left: -5px !important;
+                     }
+      - type: grid
+        cards:
+          - type: custom:bubble-card
+            card_type: separator
+            name: Calendar
+            icon: mdi:calendar
+            grid_options:
+              columns: full
+          - entities:
+              - entity: calendar.bnmrecycling
+                label: mdi:trash-can
+                accent_color: '#008000'
+                color: ''
+              - entity: calendar.work_shifts
+                label: mdi:hospital-building
+                split_multiday_events: false
+                accent_color: '#FF0000'
+              - entity: calendar.family
+            show_empty_days: true
+            split_multiday_events: true
+            title: ''
+            vertical_line_width: 4px
+            day_spacing: 12px
+            event_spacing: 1px
+            day_separator_width: 1px
+            today_indicator: dot
+            today_indicator_size: 12px
+            month_font_size: 14px
+            show_single_allday_time: false
+            time_24h: true
+            weather:
+              position: date
+              date:
+                show_conditions: true
+                show_high_temp: true
+                show_low_temp: true
+                icon_size: 15px
+                font_size: 13px
+                color: var(--primary-text-color)
+              event:
+                show_conditions: true
+                show_temp: true
+                icon_size: 20px
+                font_size: 12px
+                color: var(--primary-text-color)
+              entity: weather.home
+            type: custom:calendar-card-pro
+            visibility:
+              - condition: state
+                entity: group.family
+                state: home
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                .event-title {
+                  font-weight: 800 !important;
+                }
+                .empty-day-title {
+                  font-weight: 800 !important;
+                  color: var(--primary-text-color) !important;
+                }
+          - type: custom:mushroom-chips-card
+            chips:
+              - type: entity
+                entity: sensor.e1002_battery_level
+              - type: template
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                content: 'Last updated: {{ now().strftime(''%H:%M'') }}'
+                icon: ''
+            alignment: end
+            grid_options:
+              columns: full
+    cards: []
+  - type: sections
+    max_columns: 4
+    title: Energy
+    path: energy
+    sections:
+      - type: grid
+        cards:
+          - type: energy-sources-table
+      - type: grid
+        cards:
+          - type: energy-solar-graph
+          - type: custom:mushroom-chips-card
+            chips:
+              - type: entity
+                entity: sensor.e1002_battery_level
+              - type: template
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                content: 'Last updated: {{ now().strftime(''%d %B, %H:%M'') }}'
+                icon: ''
+            alignment: end
+    dense_section_placement: true
+    cards: []
+  - type: sections
+    max_columns: 4
+    title: Plants
+    path: plants
+    subview: false
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Plants
+            heading_style: subtitle
+            icon: mdi:flower
+          - type: custom:flower-card
+            entity: plant.olive
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+            visibility:
+              - condition: state
+                entity: plant.olive
+                state: problem
+          - type: custom:flower-card
+            entity: plant.fishbone_cactus
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+            visibility:
+              - condition: state
+                entity: plant.fishbone_cactus
+                state: problem
+          - type: custom:flower-card
+            entity: plant.dracaena
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            grid_options:
+              columns: 12
+              rows: auto
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+            visibility:
+              - condition: state
+                entity: plant.dracaena
+                state: problem
+          - type: custom:flower-card
+            entity: plant.butterfly_palm
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            grid_options:
+              columns: 12
+              rows: auto
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+            visibility:
+              - condition: state
+                entity: plant.butterfly_palm
+                state: problem
+          - type: custom:flower-card
+            entity: plant.fishbone_cactus_kitchen
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            grid_options:
+              columns: 12
+              rows: auto
+            visibility:
+              - condition: state
+                entity: plant.fishbone_cactus_kitchen
+                state: problem
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+          - type: custom:flower-card
+            entity: plant.peperomia
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            grid_options:
+              columns: 12
+              rows: auto
+            visibility:
+              - condition: state
+                entity: plant.peperomia
+                state: problem
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+          - type: custom:flower-card
+            entity: plant.peperomia_santorini
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            grid_options:
+              columns: 12
+              rows: auto
+            visibility:
+              - condition: state
+                entity: plant.peperomia_santorini
+                state: problem
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+          - type: custom:flower-card
+            entity: plant.fishbone_cactus_office
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            grid_options:
+              columns: 12
+              rows: auto
+            visibility:
+              - condition: state
+                entity: plant.fishbone_cactus_office
+                state: problem
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+          - type: custom:flower-card
+            entity: plant.mistletoe_cactus
+            show_bars:
+              - humidity
+              - moisture
+              - conductivity
+              - illuminance
+            display_type: full
+            grid_options:
+              columns: 12
+              rows: auto
+            visibility:
+              - condition: state
+                entity: plant.mistletoe_cactus
+                state: problem
+            card_mod:
+              style: |
+                ha-card {
+                  font-weight: 800 !important;
+                }
+                div.header-compact img {
+                  display: none;
+                }
+                div.header-compact {
+                  padding-left: 10px;
+                }
+                div.header img {
+                  display: none;
+                }
+                div.header {
+                  padding-left: 10px;
+                }
+                span#species {
+                  color: var(--primary-text-color) !important;
+                }
+                div.meter {
+                  opacity: 1 !important;
+                  background: white !important;
+                  border: 1px solid black !important;
+                  border-radius: 15px !important;
+                }
+          - type: custom:mushroom-chips-card
+            chips:
+              - type: entity
+                entity: sensor.e1002_battery_level
+              - type: template
+                tap_action:
+                  action: none
+                hold_action:
+                  action: none
+                double_tap_action:
+                  action: none
+                content: 'Last updated: {{ now().strftime(''%d %B, %H:%M'') }}'
+                icon: ''
+            alignment: end
+        column_span: 2
+    cards: []
+  - type: panel
+    title: Wallpaper
+    path: wallpaper
+    cards:
+      - type: picture
+        image:
+          media_content_id: media-source://image_upload/603b1cd5e43558ee104cac44c966ae4f
+          media_content_type: image/jpeg
+          metadata:
+            title: PXL_20241013_030127162.jpg
+            thumbnail: /api/image/serve/603b1cd5e43558ee104cac44c966ae4f/256x256
+            media_class: image
+            navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://image_upload
