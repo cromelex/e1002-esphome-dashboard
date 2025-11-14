@@ -30,7 +30,8 @@ psram:
   speed: 80MHz
 
 logger:
-
+  hardware_uart: UART0 # Required to report logs over USB on this device
+  
 api:
   encryption:
     key: "your_random_encryption_key"
