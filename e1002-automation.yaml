@@ -8,19 +8,44 @@ actions:
   - choose:
       - alias: If any plant is in state "problem", display the Plants Dashboard page
         conditions:
-          - condition: state
-            entity_id:
-              - plant.butterfly_palm
-              - plant.dracaena
-              - plant.olive
-              - plant.fishbone_cactus
-              - plant.fishbone_cactus_kitchen
-              - plant.fishbone_cactus_office
-              - plant.mistletoe_cactus
-              - plant.peperomia
-              - plant.peperomia_santorini
-            state:
-              - problem
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: plant.butterfly_palm
+                state:
+                  - problem
+              - condition: state
+                entity_id: plant.dracaena
+                state:
+                  - problem
+              - condition: state
+                entity_id: plant.olive
+                state:
+                  - problem
+              - condition: state
+                entity_id: plant.fishbone_cactus
+                state:
+                  - problem
+              - condition: state
+                entity_id: plant.fishbone_cactus_kitchen
+                state:
+                  - problem
+              - condition: state
+                entity_id: plant.fishbone_cactus_office
+                state:
+                  - problem
+              - condition: state
+                entity_id: plant.mistletoe_cactus
+                state:
+                  - problem
+              - condition: state
+                entity_id: plant.peperomia
+                state:
+                  - problem
+              - condition: state
+                entity_id: plant.peperomia_santorini
+                state:
+                  - problem
         sequence:
           - action: input_select.select_option
             metadata: {}
