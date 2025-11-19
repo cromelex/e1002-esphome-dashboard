@@ -371,7 +371,7 @@ online_image:
     format: PNG
     type: RGB565
     buffer_size: 65536
-    url: http://homeassistant.local:10000/eink-e1002/home?viewport=800x480&theme=graphite-eink-light&eink=10&dither=floydSteinberg&serpentine&display=acep
+    url: http://homeassistant.local:10000/eink-e1002/home?device=seeed-reterminal-e1002&theme=Graphite+E-ink+Light
     update_interval: never
     on_download_finished:
       - delay: 100ms
@@ -381,7 +381,7 @@ online_image:
     format: PNG
     type: RGB565
     buffer_size: 65536
-    url: http://homeassistant.local:10000/eink-e1002/energy?viewport=800x480&theme=graphite-eink-light&eink=10&dither=floydSteinberg&serpentine&display=acep
+    url: http://homeassistant.local:10000/eink-e1002/energy?device=seeed-reterminal-e1002&theme=Graphite+E-ink+Light
     update_interval: never
     on_download_finished:
       - delay: 100ms
@@ -391,7 +391,7 @@ online_image:
     format: PNG
     type: RGB565
     buffer_size: 65536
-    url: http://homeassistant.local:10000/eink-e1002/plants?viewport=800x480&theme=graphite-eink-light
+    url: http://homeassistant.local:10000/eink-e1002/plants?device=seeed-reterminal-e1002&theme=Graphite+E-ink+Light
     update_interval: never
     on_download_finished:
       - delay: 100ms
@@ -401,7 +401,7 @@ online_image:
     format: PNG
     type: RGB565
     buffer_size: 65536
-    url: http://homeassistant.local:10000/eink-e1002/wallpaper?viewport=800x480&theme=graphite-eink-light&eink=32&dither=floydSteinberg&serpentine&display=spectra6
+    url: http://homeassistant.local:10000/eink-e1002/wallpaper?device=seeed-reterminal-e1002&theme=Graphite+E-ink+Light
     update_interval: never
     on_download_finished:
       - delay: 100ms
