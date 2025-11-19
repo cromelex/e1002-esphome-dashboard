@@ -70,7 +70,6 @@ views:
                 ha-tile-icon$: |
                   .container {
                     width: 50px !important;
-                    height: 50px !important;
                   }
                 .: |
                   ha-tile-icon {
@@ -101,7 +100,6 @@ views:
                 ha-tile-icon$: |
                   .container {
                     width: 50px !important;
-                    height: 50px !important;
                   }
                 .: |
                   ha-tile-icon {
@@ -113,7 +111,7 @@ views:
                      }
           - type: custom:mushroom-template-card
             primary: Daniel's workplace
-            secondary: '{{ states(''sensor.daniel_commute_in'') | float | round(0)  }} min'
+            secondary: '{{ states(''sensor.daniel_commute_in'') | float | round(0) }} min'
             tap_action:
               action: none
             hold_action:
@@ -166,7 +164,6 @@ views:
                 ha-tile-icon$: |
                   .container {
                     width: 50px !important;
-                    height: 50px !important;
                   }
                 .: |
                   ha-tile-icon {
@@ -179,7 +176,7 @@ views:
           - type: custom:mushroom-template-card
             secondary: >-
               {{ states('sensor.next_family_calendar_event_trip') | float |
-              round(0)  }} min
+              round(0) }} min
             tap_action:
               action: none
             hold_action:
@@ -231,7 +228,6 @@ views:
                 ha-tile-icon$: |
                   .container {
                     width: 50px !important;
-                    height: 50px !important;
                   }
                 .: |
                   ha-tile-icon {
@@ -286,7 +282,6 @@ views:
                 ha-tile-icon$: |
                   .container {
                     width: 50px !important;
-                    height: 50px !important;
                   }
                 .: |
                   ha-tile-icon {
@@ -792,7 +787,7 @@ views:
                 content: 'Last updated: {{ now().strftime(''%d %B, %H:%M'') }}'
                 icon: ''
             alignment: end
-        column_span: 2
+            column_span: 2
     cards: []
   - type: panel
     title: Wallpaper
