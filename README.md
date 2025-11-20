@@ -21,8 +21,8 @@ custom:flower-card
 
 The wallpaper is just a picture card with a sample uploaded. On my personal setup I use [immich-kiosk](https://github.com/damongolding/immich-kiosk) to allow a single URL to display dynamic content from my Immich photo library.  
 
-The ESPHome codes requires running the [Puppet Addon](https://github.com/balloob/home-assistant-addons) to generate the screenshots and convert them to the right colours for the epaper to display.
-Specifically, it relies on [pull request #25](https://github.com/balloob/home-assistant-addons/pull/25) and [pull request #37](https://github.com/balloob/home-assistant-addons/pull/37), as these implement the required functionality for dithering and display colour mapping.
+The ESPHome code requires running the [Puppet Addon](https://github.com/balloob/home-assistant-addons) version 2.4.0 or above to generate the screenshots and convert them to the right colours for the epaper to display.
+Specifically, it relies on [pull request #25](https://github.com/balloob/home-assistant-addons/pull/25) and [pull request #37](https://github.com/balloob/home-assistant-addons/pull/37), as these implement the required functionality for dithering and display colour mapping. These were fully implemented in version 2.4.0.
 
 ## Photos of the dashboards:
 Home page
