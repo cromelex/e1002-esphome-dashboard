@@ -410,15 +410,7 @@ online_image:
 display:
   - platform: epaper_spi
     id: epaper_display
-    cs_pin: GPIO10
-    dc_pin: GPIO11
-    busy_pin:
-      number: GPIO13
-      inverted: true
-    reset_pin:
-      number: GPIO12
-      inverted: false
-    model: 7.3in-spectra-e6
+    model: Seeed-reTerminal-E1002
     update_interval: never
     lambda: |-
       if (id(page_index) == 0) {
