@@ -38,3 +38,9 @@ Energy
 
 Plants
 ![Plants page](/images/plants.webp?raw=true "Plants page")
+
+## Battery Life
+After a couple of months "live", I can comment on the actual battery life.
+
+With the overnight deep sleep and 60 minutes between updates (as exists in this repo's `esphome.yaml`) I can get a full month out of the battery.
+In my personal device I have the updates every 45 minutes (with a long deep sleep overnight) and I get around 25 days out of the battery.
