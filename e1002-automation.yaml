@@ -8,44 +8,13 @@ actions:
   - choose:
       - alias: If any plant is in state "problem", display the Plants Dashboard page
         conditions:
-          - condition: or
-            conditions:
-              - condition: state
-                entity_id: plant.butterfly_palm
-                state:
-                  - problem
-              - condition: state
-                entity_id: plant.dracaena
-                state:
-                  - problem
-              - condition: state
-                entity_id: plant.olive
-                state:
-                  - problem
-              - condition: state
-                entity_id: plant.fishbone_cactus
-                state:
-                  - problem
-              - condition: state
-                entity_id: plant.fishbone_cactus_kitchen
-                state:
-                  - problem
-              - condition: state
-                entity_id: plant.fishbone_cactus_office
-                state:
-                  - problem
-              - condition: state
-                entity_id: plant.mistletoe_cactus
-                state:
-                  - problem
-              - condition: state
-                entity_id: plant.peperomia
-                state:
-                  - problem
-              - condition: state
-                entity_id: plant.peperomia_santorini
-                state:
-                  - problem
+          - condition: template
+            value_template: >-
+              {{ states.plant | selectattr('state', 'eq', 'problem') | list |
+              count > 0 }}
+          - condition: time
+            before: "17:00:00"
+            after: "10:00:00"
         sequence:
           - action: input_select.select_option
             metadata: {}
