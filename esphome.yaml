@@ -157,6 +157,12 @@ text_sensor:
       icon: mdi:wifi-strength-2
       entity_category: diagnostic
       id: sensorssid
+  - platform: template
+    name: "${friendly_name} Last Seen"
+    entity_category: diagnostic
+    id: sensor_last_seen
+    lambda: |-
+      return id(homeassistant_time).now().strftime("%Y-%m-%d %H:%M:%S");      
 
 interval:
   - interval: 1s
