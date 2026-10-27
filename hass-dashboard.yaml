@@ -15,19 +15,20 @@ views:
                 animated_icons: false
                 rows:
                   - segments:
-                      - type: icon
-                        icon: mdi:thermometer
-                      - type: weather
-                        attribute: temperature
-                      - type: spacer
                       - type: weather
                     font_size: 1.5em
-                  - alignment: center
-                    segments:
+                  - segments:
+                      - type: weather
+                        attribute: temperature
+                      - type: icon
+                        icon: mdi:thermometer
+                    font_size: 1.5em
+                  - segments:
                       - type: icon
                         icon: mdi:calendar
                       - type: date
                         date_pattern: ccc, d.MM.yy
+                weather_icon_type: monochrome
               forecast_strip:
                 hide: true
               forecast_list:
@@ -53,9 +54,6 @@ views:
                 clock-weather-card-forecast-list clock-weather-card-icon {
                   border-radius: 15px !important;
                   filter: grayscale(1) brightness(0.4);
-                }
-                clock-weather-card-header > clock-weather-card-icon {
-                  filter: grayscale(1) brightness(0);
                 }
           - type: heading
             icon: mdi:train-car
