@@ -21,6 +21,7 @@ views:
                         attribute: temperature
                       - type: spacer
                       - type: weather
+                    font_size: 1.5em
                   - alignment: center
                     segments:
                       - type: icon
