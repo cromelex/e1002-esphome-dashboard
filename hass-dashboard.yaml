@@ -9,37 +9,52 @@ views:
           - type: custom:clock-weather-card
             entity: weather.home
             sun_entity: sun.sun
-            hide_clock: true
             weather_icon_type: line
-            animated_icon: false
-            forecast_rows: 4
+            sections:
+              header:
+                animated_icons: false
+                rows:
+                  - segments:
+                      - type: icon
+                        icon: mdi:thermometer
+                      - type: weather
+                        attribute: temperature
+                      - type: spacer
+                      - type: weather
+                  - alignment: center
+                    segments:
+                      - type: icon
+                        icon: mdi:calendar
+                      - type: date
+                        date_pattern: ccc, d.MM.yy
+              forecast_strip:
+                hide: true
+              forecast_list:
+                count: 4
+                row_height: 40px
             card_mod:
               style: |
                 ha-card {
                   font-weight: 700;
                   padding: 0px !important
                 }
-                forecast-temperature-bar-range {
+                clock-weather-card-forecast-list .bar-fill {
                   border: 1px solid black;
                   box-sizing: border-box;
                 }
-                forecast-temperature-bar-background {
+                clock-weather-card-forecast-list .bar-track {
                   opacity: 1 !important;
                   background: white !important;
                   border: 1px solid black !important;
                   border-radius: 15px !important;
                   box-sizing: border-box !important;
                 }
-                forecast-icon {
+                clock-weather-card-forecast-list clock-weather-card-icon {
                   border-radius: 15px !important;
                   filter: grayscale(1) brightness(0.4);
-                  width: 40px;
-                  height: 40px
                 }
-                clock-weather-card-today-left {
+                clock-weather-card-header > clock-weather-card-icon {
                   filter: grayscale(1) brightness(0);
-                  max-height: 50px;
-                  transform: scale(2.8) translate(0px, 9px);
                 }
           - type: heading
             icon: mdi:train-car
