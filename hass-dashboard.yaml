@@ -16,12 +16,12 @@ views:
                 rows:
                   - segments:
                       - type: weather
-                    font_size: 1.5em
-                  - segments:
-                      - type: weather
                         attribute: temperature
                       - type: icon
                         icon: mdi:thermometer
+                    font_size: 2em
+                  - segments:
+                      - type: weather
                     font_size: 1.5em
                   - segments:
                       - type: icon
